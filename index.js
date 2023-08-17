@@ -33,6 +33,22 @@ async function run() {
 
    //database collection
    const usersCollection = client.db("code-dock").collection("users");
+   const repositoriesCollection = client.db("code-dock").collection("repositories");
+
+   //create a new repository
+   app.post("/new-repository", async (req, res) => {
+    const repoDetails = req.body;
+    console.log(repoDetails);
+
+    const result = await repositoriesCollection.insertOne(repoDetails);
+    res.send(result);
+  });
+
+  //get all repositories
+  app.get('/repositories', async(req, res)=>{
+    const result = await repositoriesCollection.find().toArray();
+      res.send(result);
+})
 
    // Send a ping to confirm a successful connection
    await client.db("admin").command({ ping: 1 });
@@ -42,7 +58,6 @@ async function run() {
     // await client.close();
   }
 }
-run().catch(console.dir);
 
 run().catch(console.dir);
 
