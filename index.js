@@ -36,7 +36,7 @@ async function run() {
    const repositoriesCollection = client.db("code-dock").collection("repositories");
 
    //create a new repository
-   app.post("/new-repository", async (req, res) => {
+   app.post("/new", async (req, res) => {
     const repoDetails = req.body;
     console.log(repoDetails);
 
