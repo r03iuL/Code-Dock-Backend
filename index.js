@@ -27,32 +27,54 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-   // Connect the client to the server	(optional starting in v4.7)
-   await client.connect();
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
 
 
-   //database collection
-   const usersCollection = client.db("code-dock").collection("users");
-   const repositoriesCollection = client.db("code-dock").collection("repositories");
+    //database collection
+    const usersCollection = client.db("code-dock").collection("users");
+    const repositoriesCollection = client.db("code-dock").collection("repositories");
 
-   //create a new repository
-   app.post("/new", async (req, res) => {
-    const repoDetails = req.body;
-    console.log(repoDetails);
+    //create a new repository
+    app.post("/new", async (req, res) => {
+      const repoDetails = req.body;
+      console.log(repoDetails);
 
-    const result = await repositoriesCollection.insertOne(repoDetails);
-    res.send(result);
+      const result = await repositoriesCollection.insertOne(repoDetails);
+      res.send(result);
+    });
+
+    //get all repositories
+    app.get('/repositories', async (req, res) => {
+      const result = await repositoriesCollection.find().toArray();
+      res.send(result);
+    })
+
+
+
+
+    // CREATE A NEW REPO 
+
+    // app.post("/new", async (req, res) => {
+    //   const repoDetails = req.body;
+    //   console.log(repoDetails);
+
+    //   const result = await repositoriesCollection.insertOne(repoDetails);
+    //   res.send(result);
+    // });
+
+    app.post("/new", async (req, res) => {
+      const repoDetails = req.body;
+
+      const result = await repositoriesCollection.insertOne(repoDetails);
+      res.status(201).json({ message: 'Repository created successfully', repo: result });
   });
 
-  //get all repositories
-  app.get('/repositories', async(req, res)=>{
-    const result = await repositoriesCollection.find().toArray();
-      res.send(result);
-})
 
-   // Send a ping to confirm a successful connection
-   await client.db("admin").command({ ping: 1 });
-   console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -63,9 +85,9 @@ run().catch(console.dir);
 
 //test
 app.get('/', (req, res) => {
-    res.send('Running')
-  })
-  
-  app.listen(port, () => {
-    console.log(`Running on port ${port}`);
-  })
+  res.send('Running')
+})
+
+app.listen(port, () => {
+  console.log(`Running on port ${port}`);
+})
