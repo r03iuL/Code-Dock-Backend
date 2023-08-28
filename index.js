@@ -36,9 +36,9 @@ async function run() {
    const repositoriesCollection = client.db("code-dock").collection("repositories");
 
    //create a new repository
-   app.post("/new", async (req, res) => {
+   app.post("/repositories", async (req, res) => {
     const repoDetails = req.body;
-    console.log(repoDetails);
+    // console.log(repoDetails);
 
     const result = await repositoriesCollection.insertOne(repoDetails);
     res.send(result);
