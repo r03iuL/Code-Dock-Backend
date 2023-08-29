@@ -35,6 +35,28 @@ async function run() {
     const usersCollection = client.db("code-dock").collection("users");
     const repositoriesCollection = client.db("code-dock").collection("repositories");
 
+    // Saved user API
+
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email }
+      const existingUser = await usersCollection.findOne(query)
+      if (existingUser) {
+        return res.send({ message: 'user already exists' })
+      }
+
+      user.role = "user"
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
+
+    
+
     //create a new repository
     app.post("/new", async (req, res) => {
       const repoDetails = req.body;
