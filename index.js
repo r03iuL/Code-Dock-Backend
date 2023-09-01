@@ -42,6 +42,7 @@ async function run() {
 
     const result = await repositoriesCollection.insertOne(repoDetails);
     res.send(result);
+
   });
 
   //get all repositories
