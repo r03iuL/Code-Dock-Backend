@@ -41,6 +41,12 @@ async function run() {
     console.log("snippetsCollection created:", snippetsCollection.collectionName);
 
 
+   //create a new repository
+   app.post("/repositories", async (req, res) => {
+    const repoDetails = req.body;
+    // console.log(repoDetails);
+
+
 
     // Create a new code snippet
     app.post("/snippets", async (req, res) => {
