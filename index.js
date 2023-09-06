@@ -63,7 +63,7 @@ async function run() {
       res.send(result);
     });
 
-
+  })
     // Get all code snippets
     app.get('/snippets', async (req, res) => {
       const result = await snippetsCollection.find().toArray();
