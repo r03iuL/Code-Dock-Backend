@@ -8,7 +8,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
-
+// const mongoose = require('mongoose');
 
 
 // middleware
@@ -74,18 +74,36 @@ async function run() {
     })
 
 
-   //create a new repository
-   app.post("/repositories", async (req, res) => {
-    const repoDetails = req.body;
-    // console.log(repoDetails);
+    //create a new repository
+    app.post("/repositories", async (req, res) => {
+      const repoDetails = req.body;
+      // console.log(repoDetails);
 
-
-    app.post('/jwt', (req, res) => {
-      const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-      res.send({ token })
     })
 
+
+    
+    // app.post("/new", async (req, res) => {
+    //   const repoDetails = req.body;
+    //   console.log(repoDetails);
+
+    //   const result = await repositoriesCollection.insertOne(repoDetails);
+    //   res.send(result);
+    // });
+
+    app.post("/new", async (req, res) => {
+      const repoDetails = req.body;
+
+      const result = await repositoriesCollection.insertOne(repoDetails);
+      res.status(201).json({ message: 'Repository created successfully', repo: result });
+    });
+
+
+    //get all repositories
+    app.get('/repositories', async (req, res) => {
+      const result = await repositoriesCollection.find().toArray();
+      res.send(result);
+    })
 
 
     // Create a new code snippet
@@ -96,7 +114,6 @@ async function run() {
       res.send(result);
     });
 
-  })
     // Get all code snippets
     app.get('/snippets', async (req, res) => {
       const result = await snippetsCollection.find().toArray();
@@ -105,7 +122,7 @@ async function run() {
 
 
 
-    app.get('/snippets/:id', verifyJWT, async (req, res) => {
+    app.get('/snippets/:id',  async (req, res) => {
       const id = req.params.id;
 
       // Validate the ID format
@@ -147,47 +164,6 @@ async function run() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     })
-
-
-
- 
-
-
-
-    //create a new repository
-    app.post("/new", async (req, res) => {
-      const repoDetails = req.body;
-      console.log(repoDetails);
-
-      const result = await repositoriesCollection.insertOne(repoDetails);
-      res.send(result);
-    });
-
-    //get all repositories
-    app.get('/repositories', verifyJWT, async (req, res) => {
-      const result = await repositoriesCollection.find().toArray();
-      res.send(result);
-    })
-
-
-
-
-    // CREATE A NEW REPO 
-
-    // app.post("/new", async (req, res) => {
-    //   const repoDetails = req.body;
-    //   console.log(repoDetails);
-
-    //   const result = await repositoriesCollection.insertOne(repoDetails);
-    //   res.send(result);
-    // });
-
-    app.post("/new", async (req, res) => {
-      const repoDetails = req.body;
-
-      const result = await repositoriesCollection.insertOne(repoDetails);
-      res.status(201).json({ message: 'Repository created successfully', repo: result });
-    });
 
 
 
