@@ -8,14 +8,15 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
-const mongoose = require('mongoose');
-
+// const mongoose = require('mongoose');
 
 
 // middleware
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
+
+
 
 
 // JWT verify
@@ -36,8 +37,6 @@ const verifyJWT = (req, res, next) => {
   })
 }
 
-
-const { MongoClient, ServerApiVersion } = require('mongodb');
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -74,12 +73,38 @@ async function run() {
       res.send({ token })
     })
 
+    // Create new repository
+    app.post("/repositories", async (req, res) => {
+      const repoDetails = req.body;
+      const result = await repositoriesCollection.insertOne(repoDetails);
+      res.send(result);
+    });
 
-   //create a new repository
-   app.post("/repositories", async (req, res) => {
-    const repoDetails = req.body;
-    // console.log(repoDetails);
+    // app.post("/new", async (req, res) => {
+    //   const repoDetails = req.body;
 
+    //   const result = await repositoriesCollection.insertOne(repoDetails);
+    //   res.status(201).json({ message: 'Repository created successfully', repo: result });
+    // });
+
+
+    //get all repositories
+    app.get('/repositories', async (req, res) => {
+      const result = await repositoriesCollection.find().toArray();
+      res.send(result);
+    })
+
+    // get user repositories by user's email
+    app.get("/myRepositories/:email", async (req, res) => {
+        const email = req?.params?.email;
+        const query = { email: email }
+        // const options = {
+        //   sort: { _id: -1 }
+        // }
+        const result = await repositoriesCollection.find(query).toArray();
+        res.send(result);
+  
+      });
 
 
     // Create a new code snippet
@@ -90,23 +115,15 @@ async function run() {
       res.send(result);
     });
 
-  })
     // Get all code snippets
     app.get('/snippets', async (req, res) => {
       const result = await snippetsCollection.find().toArray();
       res.send(result);
     })
 
-    // Get a single code snippet by _id
-    // app.get('/snippets/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) }
-    //   const result = await snippetsCollection.findOne(query);
-    //   res.send(result);
-    // });
 
 
-    app.get('/snippets/:id', verifyJWT, async (req, res) => {
+    app.get('/snippets/:id',  async (req, res) => {
       const id = req.params.id;
 
       // Validate the ID format
@@ -129,77 +146,25 @@ async function run() {
     });
 
 
-
-
     // Saved user API
 
-    // app.get('/users', async (req, res) => {
-    //   const result = await usersCollection.find().toArray();
-    //   res.send(result)
-    // })
-
-    // app.post('/users', async (req, res) => {
-    //   const user = req.body;
-    //   const query = { email: user.email }
-    //   const existingUser = await usersCollection.findOne(query)
-    //   if (existingUser) {
-    //     return res.send({ message: 'user already exists' })
-    //   }
-    //   user.role = "user"
-    //   const result = await usersCollection.insertOne(user);
-    //   res.send(result);
-    // })
-
-
-    //create a new repository
-    app.post("/new", async (req, res) => {
-      const repoDetails = req.body;
-      console.log(repoDetails);
-
-      const result = await repositoriesCollection.insertOne(repoDetails);
-      res.send(result);
-
-    });
-    app.get("/myRepositories/:email", async (req, res) => {
-      const email = req?.params?.email;
-      const query = { email: email }
-      // const options = {
-      //   sort: { _id: -1 }
-      // }
-      const result = await repositoriesCollection.find(query).toArray();
-      res.send(result);
-
-    });
-    app.get("/allRepositories", async (req, res) => {
-      const query = {}
-      // const options = {
-      //   sort: { _id: -1 }
-      // }
-      const result = await repositoriesCollection.find(query).toArray();
-      res.send(result);
-    });
-
-    //get all repositories
-    app.get('/repositories', verifyJWT, async (req, res) => {
-      const result = await repositoriesCollection.find().toArray();
-      res.send(result);
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result)
     })
 
-    // CREATE A NEW REPO 
-    // app.post("/new", async (req, res) => {
-    //   const repoDetails = req.body;
-    //   console.log(repoDetails);
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email }
+      const existingUser = await usersCollection.findOne(query)
+      if (existingUser) {
+        return res.send({ message: 'user already exists' })
+      }
 
-    //   const result = await repositoriesCollection.insertOne(repoDetails);
-    //   res.send(result);
-    // });
-
-    app.post("/new", async (req, res) => {
-      const repoDetails = req.body;
-
-      const result = await repositoriesCollection.insertOne(repoDetails);
-      res.status(201).json({ message: 'Repository created successfully', repo: result });
-    });
+      user.role = "user"
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
 
 
 
