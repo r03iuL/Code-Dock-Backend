@@ -1,4 +1,8 @@
 const express = require('express');
+
+const bodyParser = require('body-parser');
+
+
 const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
@@ -10,6 +14,9 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
+
+
 
 
 // JWT verify
@@ -53,10 +60,24 @@ async function run() {
     //database collection
     const usersCollection = client.db("code-dock").collection("users");
     const repositoriesCollection = client.db("code-dock").collection("repositories");
+    const messages = client.db("code-dock").collection("message");
     // Add a new collection for code snippets
     const snippetsCollection = client.db("code-dock").collection("snippets");
 
     console.log("snippetsCollection created:", snippetsCollection.collectionName);
+
+
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      res.send({ token })
+    })
+
+
+   //create a new repository
+   app.post("/repositories", async (req, res) => {
+    const repoDetails = req.body;
+    // console.log(repoDetails);
 
 
     app.post('/jwt', (req, res) => {
@@ -75,7 +96,7 @@ async function run() {
       res.send(result);
     });
 
-
+  })
     // Get all code snippets
     app.get('/snippets', async (req, res) => {
       const result = await snippetsCollection.find().toArray();
@@ -84,7 +105,7 @@ async function run() {
 
 
 
-    app.get('/snippets/:id', async (req, res) => {
+    app.get('/snippets/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
 
       // Validate the ID format
@@ -129,6 +150,10 @@ async function run() {
 
 
 
+ 
+
+
+
     //create a new repository
     app.post("/new", async (req, res) => {
       const repoDetails = req.body;
@@ -163,6 +188,47 @@ async function run() {
       const result = await repositoriesCollection.insertOne(repoDetails);
       res.status(201).json({ message: 'Repository created successfully', repo: result });
     });
+
+
+
+    // Live chat apis (New Feature)
+
+    // const Message = mongoose.model('Message', { text: String, sender: String, timestamp: Date });
+
+    // app.post('/user/sendMessage', async (req, res) => {
+    //   const { text } = req.body;
+    //   const newMessage = new Message({ text, sender: 'admin', timestamp: new Date() });
+
+    //   try {
+    //     await newMessage.save();
+
+    //     // Simulate a delay before sending the auto-reply
+    //     setTimeout(async () => {
+    //       const autoReply = new Message({
+    //         text: 'Thank you for your message! An admin will get back to you shortly.',
+    //         sender: 'admin',
+    //         timestamp: new Date(),
+    //       });
+    //       await autoReply.save();
+
+    //       res.status(200).json({ message: 'Message sent successfully.' });
+    //     }, 1000); // Adjust the delay as needed
+    //   } catch (error) {
+    //     res.status(500).json({ error: 'An error occurred while sending the message.' });
+    //   }
+    // });
+
+    // app.get('/user/getMessages', async (req, res) => {
+    //   try {
+    //     const messages = await Message.find();
+    //     res.status(200).json({ messages });
+    //   } catch (error) {
+    //     res.status(500).json({ error: 'An error occurred while fetching messages.' });
+    //   }
+    // });
+
+
+
 
 
 
