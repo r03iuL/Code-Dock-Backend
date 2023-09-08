@@ -18,6 +18,25 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 
+// JWT verify
+
+const verifyJWT = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: 'unauthorized users' })
+  }
+
+  const token = authorization.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ error: true, message: 'unauthorized users' })
+    }
+    req.decoded = decoded;
+    next()
+  })
+}
+
+
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -46,6 +65,13 @@ async function run() {
     const snippetsCollection = client.db("code-dock").collection("snippets");
 
     console.log("snippetsCollection created:", snippetsCollection.collectionName);
+
+
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      res.send({ token })
+    })
 
 
    //create a new repository
@@ -79,7 +105,7 @@ async function run() {
     // });
 
 
-    app.get('/snippets/:id', async (req, res) => {
+    app.get('/snippets/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
 
       // Validate the ID format
@@ -108,23 +134,23 @@ async function run() {
 
     // Saved user API
 
-    app.get('/users', async (req, res) => {
-      const result = await usersCollection.find().toArray();
-      res.send(result)
-    })
+    // app.get('/users', async (req, res) => {
+    //   const result = await usersCollection.find().toArray();
+    //   res.send(result)
+    // })
 
-    app.post('/users', async (req, res) => {
-      const user = req.body;
-      const query = { email: user.email }
-      const existingUser = await usersCollection.findOne(query)
-      if (existingUser) {
-        return res.send({ message: 'user already exists' })
-      }
+    // app.post('/users', async (req, res) => {
+    //   const user = req.body;
+    //   const query = { email: user.email }
+    //   const existingUser = await usersCollection.findOne(query)
+    //   if (existingUser) {
+    //     return res.send({ message: 'user already exists' })
+    //   }
 
-      user.role = "user"
-      const result = await usersCollection.insertOne(user);
-      res.send(result);
-    })
+    //   user.role = "user"
+    //   const result = await usersCollection.insertOne(user);
+    //   res.send(result);
+    // })
 
 
 
@@ -138,7 +164,7 @@ async function run() {
     });
 
     //get all repositories
-    app.get('/repositories', async (req, res) => {
+    app.get('/repositories', verifyJWT, async (req, res) => {
       const result = await repositoriesCollection.find().toArray();
       res.send(result);
     })
