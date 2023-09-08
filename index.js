@@ -131,8 +131,6 @@ async function run() {
 
 
 
-
-
     // Saved user API
 
     // app.get('/users', async (req, res) => {
@@ -147,12 +145,10 @@ async function run() {
     //   if (existingUser) {
     //     return res.send({ message: 'user already exists' })
     //   }
-
     //   user.role = "user"
     //   const result = await usersCollection.insertOne(user);
     //   res.send(result);
     // })
-
 
 
     //create a new repository
@@ -189,11 +185,7 @@ async function run() {
       res.send(result);
     })
 
-
-
-
     // CREATE A NEW REPO 
-
     // app.post("/new", async (req, res) => {
     //   const repoDetails = req.body;
     //   console.log(repoDetails);
