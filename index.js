@@ -11,8 +11,6 @@ app.use(cors());
 app.use(express.json());
 
 
-
-
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dznbzjy.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -35,15 +33,33 @@ async function run() {
     const usersCollection = client.db("code-dock").collection("users");
     const repositoriesCollection = client.db("code-dock").collection("repositories");
 
-   //create a new repository
-   app.post("/repositories", async (req, res) => {
-    const repoDetails = req.body;
-    // console.log(repoDetails);
+    //create a new repository
+    app.post("/repositories", async (req, res) => {
+      const repoDetails = req.body;
+      // console.log(repoDetails);
 
-    const result = await repositoriesCollection.insertOne(repoDetails);
-    res.send(result);
+      const result = await repositoriesCollection.insertOne(repoDetails);
+      res.send(result);
 
-  });
+    });
+    app.get("/myRepositories/:email", async (req, res) => {
+      const email = req?.params?.email;
+      const query = { email: email }
+      // const options = {
+      //   sort: { _id: -1 }
+      // }
+      const result = await repositoriesCollection.find(query).toArray();
+      res.send(result);
+
+    });
+    app.get("/allRepositories", async (req, res) => {
+      const query = {}
+      // const options = {
+      //   sort: { _id: -1 }
+      // }
+      const result = await repositoriesCollection.find(query).toArray();
+      res.send(result);
+    });
 
 
 
