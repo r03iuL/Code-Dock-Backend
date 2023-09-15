@@ -52,6 +52,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
@@ -62,6 +63,7 @@ async function run() {
     const messages = client.db("code-dock").collection("message");
     // Add a new collection for code snippets
     const snippetsCollection = client.db("code-dock").collection("snippets");
+    const updateProfileCollection = client.db("code-dock").collection("profile");
 
     // console.log("snippetsCollection created:", snippetsCollection.collectionName);
 
@@ -253,6 +255,41 @@ async function run() {
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+    // user profile update
+app.get('/profile/:id', async (req, res) => {
+  const id = req.params.id
+  const query = { _id: new ObjectId(id) }
+  const result = await updateProfileCollection.findOne(query);
+  res.send(result);
+})
+
+app.post('/profile', async (req, res) => {
+  const newProfile = req.body;
+  console.log(newProfile);
+  const result = await updateProfileCollection.insertOne(newProfile);
+  res.send(result);
+})
+
+app.put('/updateProfile/:email', async (req, res) => {
+  const email = req.params.email;
+  const filter = { email: email }
+  const options = { upsert: true };
+  const updateProfile = req.body;
+  const profile = {
+    $set: {
+      name: updateProfile.name,
+      quantity: updateProfile.email,
+      supplier: updateProfile.number,
+      photo: updateProfile.photo,
+    }
+
+  }
+  const result = await usersCollection.updateOne(filter, profile, options);
+  res.send(result);
+
+  
+})
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -269,3 +306,7 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Running on port ${port}`);
 })
+
+
+
+
