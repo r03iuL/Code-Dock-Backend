@@ -211,39 +211,39 @@ async function run() {
 
     // Live chat apis (New Feature)
 
-    // const Message = mongoose.model('Message', { text: String, sender: String, timestamp: Date });
+    const Message = mongoose.model('Message', { text: String, sender: String, timestamp: Date });
 
-    // app.post('/user/sendMessage', async (req, res) => {
-    //   const { text } = req.body;
-    //   const newMessage = new Message({ text, sender: 'admin', timestamp: new Date() });
+    app.post('/user/sendMessage', async (req, res) => {
+      const { text } = req.body;
+      const newMessage = new Message({ text, sender: 'admin', timestamp: new Date() });
 
-    //   try {
-    //     await newMessage.save();
+      try {
+        await newMessage.save();
 
-    //     // Simulate a delay before sending the auto-reply
-    //     setTimeout(async () => {
-    //       const autoReply = new Message({
-    //         text: 'Thank you for your message! An admin will get back to you shortly.',
-    //         sender: 'admin',
-    //         timestamp: new Date(),
-    //       });
-    //       await autoReply.save();
+        // Simulate a delay before sending the auto-reply
+        setTimeout(async () => {
+          const autoReply = new Message({
+            text: 'Thank you for your message! An admin will get back to you shortly.',
+            sender: 'admin',
+            timestamp: new Date(),
+          });
+          await autoReply.save();
 
-    //       res.status(200).json({ message: 'Message sent successfully.' });
-    //     }, 1000); // Adjust the delay as needed
-    //   } catch (error) {
-    //     res.status(500).json({ error: 'An error occurred while sending the message.' });
-    //   }
-    // });
+          res.status(200).json({ message: 'Message sent successfully.' });
+        }, 1000); // Adjust the delay as needed
+      } catch (error) {
+        res.status(500).json({ error: 'An error occurred while sending the message.' });
+      }
+    });
 
-    // app.get('/user/getMessages', async (req, res) => {
-    //   try {
-    //     const messages = await Message.find();
-    //     res.status(200).json({ messages });
-    //   } catch (error) {
-    //     res.status(500).json({ error: 'An error occurred while fetching messages.' });
-    //   }
-    // });
+    app.get('/user/getMessages', async (req, res) => {
+      try {
+        const messages = await Message.find();
+        res.status(200).json({ messages });
+      } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching messages.' });
+      }
+    });
 
 
 
