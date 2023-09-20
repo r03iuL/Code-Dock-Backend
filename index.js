@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 // middleware
@@ -38,7 +39,6 @@ const verifyJWT = (req, res, next) => {
 
 
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dznbzjy.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -52,6 +52,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
@@ -62,6 +63,7 @@ async function run() {
     const messages = client.db("code-dock").collection("message");
     // Add a new collection for code snippets
     const snippetsCollection = client.db("code-dock").collection("snippets");
+    const updateProfileCollection = client.db("code-dock").collection("profile");
 
     // console.log("snippetsCollection created:", snippetsCollection.collectionName);
 
@@ -125,6 +127,19 @@ async function run() {
         //   sort: { _id: -1 }
         // }
         const result = await repositoriesCollection.find(query).toArray();
+        res.send(result);
+  
+      });
+    // get user repositories by user's email
+    app.get("/myRepositoriesId/:id", async (req, res) => {
+        const id = req?.params?.id;
+        // console.log(id)
+        const query = {_id: new ObjectId(id)}
+        // const options = {
+        //   sort: { _id: -1 }
+        // }
+        const result = await repositoriesCollection.findOne(query);
+        // console.log(result)
         res.send(result);
   
       });
@@ -253,6 +268,41 @@ async function run() {
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+    // user profile update
+app.get('/profile/:id', async (req, res) => {
+  const id = req.params.id
+  const query = { _id: new ObjectId(id) }
+  const result = await updateProfileCollection.findOne(query);
+  res.send(result);
+})
+
+app.post('/profile', async (req, res) => {
+  const newProfile = req.body;
+  console.log(newProfile);
+  const result = await updateProfileCollection.insertOne(newProfile);
+  res.send(result);
+})
+
+app.put('/updateProfile/:email', async (req, res) => {
+  const email = req.params.email;
+  const filter = { email: email }
+  const options = { upsert: true };
+  const updateProfile = req.body;
+  const profile = {
+    $set: {
+      name: updateProfile.name,
+      quantity: updateProfile.email,
+      supplier: updateProfile.number,
+      photo: updateProfile.photo,
+    }
+
+  }
+  const result = await usersCollection.updateOne(filter, profile, options);
+  res.send(result);
+
+  
+})
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -269,3 +319,7 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Running on port ${port}`);
 })
+
+
+
+
