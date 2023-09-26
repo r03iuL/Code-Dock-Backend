@@ -88,9 +88,9 @@ async function run() {
     //   res.status(201).json({ message: 'Repository created successfully', repo: result });
     // });
 
-  
 
-    
+
+
     // app.post("/new", async (req, res) => {
     //   const repoDetails = req.body;
     //   console.log(repoDetails);
@@ -121,28 +121,28 @@ async function run() {
 
     // get user repositories by user's email
     app.get("/myRepositories/:email", async (req, res) => {
-        const email = req?.params?.email;
-        const query = { email: email }
-        // const options = {
-        //   sort: { _id: -1 }
-        // }
-        const result = await repositoriesCollection.find(query).toArray();
-        res.send(result);
-  
-      });
+      const email = req?.params?.email;
+      const query = { email: email }
+      // const options = {
+      //   sort: { _id: -1 }
+      // }
+      const result = await repositoriesCollection.find(query).toArray();
+      res.send(result);
+
+    });
     // get user repositories by user's email
     app.get("/myRepositoriesId/:id", async (req, res) => {
-        const id = req?.params?.id;
-        // console.log(id)
-        const query = {_id: new ObjectId(id)}
-        // const options = {
-        //   sort: { _id: -1 }
-        // }
-        const result = await repositoriesCollection.findOne(query);
-        // console.log(result)
-        res.send(result);
-  
-      });
+      const id = req?.params?.id;
+      // console.log(id)
+      const query = { _id: new ObjectId(id) }
+      // const options = {
+      //   sort: { _id: -1 }
+      // }
+      const result = await repositoriesCollection.findOne(query);
+      // console.log(result)
+      res.send(result);
+
+    });
 
     //get all repositories
     app.get('/repositories', async (req, res) => {
@@ -152,15 +152,15 @@ async function run() {
 
     // get user repositories by user's email
     app.get("/myRepositories/:email", async (req, res) => {
-        const email = req?.params?.email;
-        const query = { email: email }
-        // const options = {
-        //   sort: { _id: -1 }
-        // }
-        const result = await repositoriesCollection.find(query).toArray();
-        res.send(result);
-  
-      });
+      const email = req?.params?.email;
+      const query = { email: email }
+      // const options = {
+      //   sort: { _id: -1 }
+      // }
+      const result = await repositoriesCollection.find(query).toArray();
+      res.send(result);
+
+    });
 
 
     // Create a new code snippet
@@ -179,7 +179,7 @@ async function run() {
 
 
 
-    app.get('/snippets/:id',  async (req, res) => {
+    app.get('/snippets/:id', async (req, res) => {
       const id = req.params.id;
 
       // Validate the ID format
@@ -202,25 +202,56 @@ async function run() {
     });
 
 
-    // Saved user API
 
+    // users related api 
     app.get('/users', async (req, res) => {
       const result = await usersCollection.find().toArray();
-      res.send(result)
-    })
+      res.send(result);
+    });
+
 
     app.post('/users', async (req, res) => {
       const user = req.body;
-      const query = { email: user.email }
-      const existingUser = await usersCollection.findOne(query)
+      const query = { email: user?.email }
+      const existingUser = await usersCollection.findOne(query);
+
       if (existingUser) {
         return res.send({ message: 'user already exists' })
       }
-
-      user.role = "user"
       const result = await usersCollection.insertOne(user);
       res.send(result);
+    });
+
+    app.get('/users/admin/:email', async (req, res) => {
+      const email = req.params.email
+      const query = { email: email }
+      const user = await usersCollection.findOne(query);
+      const result = { admin: user?.role === 'admin' }
+      res.send(result);
     })
+
+
+    // for make admin 
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: 'admin'
+        },
+      };
+
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
+    // delete users 
+    app.delete('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
 
 
 
@@ -270,39 +301,39 @@ async function run() {
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
     // user profile update
-app.get('/profile/:id', async (req, res) => {
-  const id = req.params.id
-  const query = { _id: new ObjectId(id) }
-  const result = await updateProfileCollection.findOne(query);
-  res.send(result);
-})
+    app.get('/profile/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await updateProfileCollection.findOne(query);
+      res.send(result);
+    })
 
-app.post('/profile', async (req, res) => {
-  const newProfile = req.body;
-  console.log(newProfile);
-  const result = await updateProfileCollection.insertOne(newProfile);
-  res.send(result);
-})
+    app.post('/profile', async (req, res) => {
+      const newProfile = req.body;
+      console.log(newProfile);
+      const result = await updateProfileCollection.insertOne(newProfile);
+      res.send(result);
+    })
 
-app.put('/updateProfile/:email', async (req, res) => {
-  const email = req.params.email;
-  const filter = { email: email }
-  const options = { upsert: true };
-  const updateProfile = req.body;
-  const profile = {
-    $set: {
-      name: updateProfile.name,
-      quantity: updateProfile.email,
-      supplier: updateProfile.number,
-      photo: updateProfile.photo,
-    }
+    app.put('/updateProfile/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email }
+      const options = { upsert: true };
+      const updateProfile = req.body;
+      const profile = {
+        $set: {
+          name: updateProfile.name,
+          quantity: updateProfile.email,
+          supplier: updateProfile.number,
+          photo: updateProfile.photo,
+        }
 
-  }
-  const result = await usersCollection.updateOne(filter, profile, options);
-  res.send(result);
+      }
+      const result = await usersCollection.updateOne(filter, profile, options);
+      res.send(result);
 
-  
-})
+
+    })
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
