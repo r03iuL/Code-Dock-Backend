@@ -88,9 +88,9 @@ async function run() {
     //   res.status(201).json({ message: 'Repository created successfully', repo: result });
     // });
 
-  
 
-    
+
+
     // app.post("/new", async (req, res) => {
     //   const repoDetails = req.body;
     //   console.log(repoDetails);
@@ -119,30 +119,44 @@ async function run() {
       res.send(result);
     })
 
+    // Search Repo
+
+    app.get('/searchRepoByText/:text', async (req, res) => {
+      const searchText = req.params.text;
+
+      const result = await repositoriesCollection.find({
+        $or: [
+          { repoName: { $regex: searchText, $options: 'i' } },
+          { category: { $regex: searchText, $options: 'i' } },
+        ],
+      }).sort({ price: 1 }).collation({ locale: "en_US", numericOrdering: true }).toArray()
+      res.send(result)
+    })
+
     // get user repositories by user's email
     app.get("/myRepositories/:email", async (req, res) => {
-        const email = req?.params?.email;
-        const query = { email: email }
-        // const options = {
-        //   sort: { _id: -1 }
-        // }
-        const result = await repositoriesCollection.find(query).toArray();
-        res.send(result);
-  
-      });
+      const email = req?.params?.email;
+      const query = { email: email }
+      // const options = {
+      //   sort: { _id: -1 }
+      // }
+      const result = await repositoriesCollection.find(query).toArray();
+      res.send(result);
+
+    });
     // get user repositories by user's email
     app.get("/myRepositoriesId/:id", async (req, res) => {
-        const id = req?.params?.id;
-        // console.log(id)
-        const query = {_id: new ObjectId(id)}
-        // const options = {
-        //   sort: { _id: -1 }
-        // }
-        const result = await repositoriesCollection.findOne(query);
-        // console.log(result)
-        res.send(result);
-  
-      });
+      const id = req?.params?.id;
+      // console.log(id)
+      const query = { _id: new ObjectId(id) }
+      // const options = {
+      //   sort: { _id: -1 }
+      // }
+      const result = await repositoriesCollection.findOne(query);
+      // console.log(result)
+      res.send(result);
+
+    });
 
     //get all repositories
     app.get('/repositories', async (req, res) => {
@@ -152,15 +166,15 @@ async function run() {
 
     // get user repositories by user's email
     app.get("/myRepositories/:email", async (req, res) => {
-        const email = req?.params?.email;
-        const query = { email: email }
-        // const options = {
-        //   sort: { _id: -1 }
-        // }
-        const result = await repositoriesCollection.find(query).toArray();
-        res.send(result);
-  
-      });
+      const email = req?.params?.email;
+      const query = { email: email }
+      // const options = {
+      //   sort: { _id: -1 }
+      // }
+      const result = await repositoriesCollection.find(query).toArray();
+      res.send(result);
+
+    });
 
 
     // Create a new code snippet
@@ -179,7 +193,7 @@ async function run() {
 
 
 
-    app.get('/snippets/:id',  async (req, res) => {
+    app.get('/snippets/:id', async (req, res) => {
       const id = req.params.id;
 
       // Validate the ID format
@@ -226,39 +240,39 @@ async function run() {
 
     // Live chat apis (New Feature)
 
-    // const Message = mongoose.model('Message', { text: String, sender: String, timestamp: Date });
+    const Message = mongoose.model('Message', { text: String, sender: String, timestamp: Date });
 
-    // app.post('/user/sendMessage', async (req, res) => {
-    //   const { text } = req.body;
-    //   const newMessage = new Message({ text, sender: 'admin', timestamp: new Date() });
+    app.post('/user/sendMessage', async (req, res) => {
+      const { text } = req.body;
+      const newMessage = new Message({ text, sender: 'admin', timestamp: new Date() });
 
-    //   try {
-    //     await newMessage.save();
+      try {
+        await newMessage.save();
 
-    //     // Simulate a delay before sending the auto-reply
-    //     setTimeout(async () => {
-    //       const autoReply = new Message({
-    //         text: 'Thank you for your message! An admin will get back to you shortly.',
-    //         sender: 'admin',
-    //         timestamp: new Date(),
-    //       });
-    //       await autoReply.save();
+        // Simulate a delay before sending the auto-reply
+        setTimeout(async () => {
+          const autoReply = new Message({
+            text: 'Thank you for your message! An admin will get back to you shortly.',
+            sender: 'admin',
+            timestamp: new Date(),
+          });
+          await autoReply.save();
 
-    //       res.status(200).json({ message: 'Message sent successfully.' });
-    //     }, 1000); // Adjust the delay as needed
-    //   } catch (error) {
-    //     res.status(500).json({ error: 'An error occurred while sending the message.' });
-    //   }
-    // });
+          res.status(200).json({ message: 'Message sent successfully.' });
+        }, 1000); // Adjust the delay as needed
+      } catch (error) {
+        res.status(500).json({ error: 'An error occurred while sending the message.' });
+      }
+    });
 
-    // app.get('/user/getMessages', async (req, res) => {
-    //   try {
-    //     const messages = await Message.find();
-    //     res.status(200).json({ messages });
-    //   } catch (error) {
-    //     res.status(500).json({ error: 'An error occurred while fetching messages.' });
-    //   }
-    // });
+    app.get('/user/getMessages', async (req, res) => {
+      try {
+        const messages = await Message.find();
+        res.status(200).json({ messages });
+      } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching messages.' });
+      }
+    });
 
 
 
@@ -270,39 +284,39 @@ async function run() {
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
     // user profile update
-app.get('/profile/:id', async (req, res) => {
-  const id = req.params.id
-  const query = { _id: new ObjectId(id) }
-  const result = await updateProfileCollection.findOne(query);
-  res.send(result);
-})
+    app.get('/profile/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await updateProfileCollection.findOne(query);
+      res.send(result);
+    })
 
-app.post('/profile', async (req, res) => {
-  const newProfile = req.body;
-  console.log(newProfile);
-  const result = await updateProfileCollection.insertOne(newProfile);
-  res.send(result);
-})
+    app.post('/profile', async (req, res) => {
+      const newProfile = req.body;
+      console.log(newProfile);
+      const result = await updateProfileCollection.insertOne(newProfile);
+      res.send(result);
+    })
 
-app.put('/updateProfile/:email', async (req, res) => {
-  const email = req.params.email;
-  const filter = { email: email }
-  const options = { upsert: true };
-  const updateProfile = req.body;
-  const profile = {
-    $set: {
-      name: updateProfile.name,
-      quantity: updateProfile.email,
-      supplier: updateProfile.number,
-      photo: updateProfile.photo,
-    }
+    app.put('/updateProfile/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email }
+      const options = { upsert: true };
+      const updateProfile = req.body;
+      const profile = {
+        $set: {
+          name: updateProfile.name,
+          quantity: updateProfile.email,
+          supplier: updateProfile.number,
+          photo: updateProfile.photo,
+        }
 
-  }
-  const result = await usersCollection.updateOne(filter, profile, options);
-  res.send(result);
+      }
+      const result = await usersCollection.updateOne(filter, profile, options);
+      res.send(result);
 
-  
-})
+
+    })
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
