@@ -130,6 +130,7 @@ async function run() {
       res.send(result);
 
     });
+
     // get user repositories by user's email
     app.get("/myRepositoriesId/:id", async (req, res) => {
       const id = req?.params?.id;
@@ -143,6 +144,7 @@ async function run() {
       res.send(result);
 
     });
+
 
     //get all repositories
     app.get('/repositories', async (req, res) => {
@@ -209,6 +211,9 @@ async function run() {
       res.send(result);
     });
 
+
+
+    
 
     app.post('/users', async (req, res) => {
       const user = req.body;
@@ -315,6 +320,27 @@ async function run() {
       res.send(result);
     })
 
+
+    app.put('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const query = {
+        email: email
+      }
+      const options = {
+        upsert: true
+      }
+
+      const updateDoc = {
+        $set: user,
+      }
+      const result = await usersCollection.updateOne(query, updateDoc, options)
+      console.log(result);
+      res.send(result)
+
+
+    }) 
+
     app.put('/updateProfile/:email', async (req, res) => {
       const email = req.params.email;
       const filter = { email: email }
@@ -334,12 +360,13 @@ async function run() {
 
 
     })
+
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
   }
 }
-
+ 
 run().catch(console.dir);
 
 //test
@@ -350,7 +377,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Running on port ${port}`);
 })
-
-
-
 
